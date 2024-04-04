@@ -1,3 +1,71 @@
+/* SVG ICONS */
+let playerX = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+let playerO = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
+/* -----------*/
+
+/* ANIMATIONS HERE */
+let animate = function(){
+    
+    let endAnimations = function(player){
+        const playerChoicesX = document.querySelectorAll('.playerX');
+        const playerChoicesO = document.querySelectorAll('.playerO');
+        if(player == playerO) {
+            playerChoicesO.forEach(svg => {
+                svg.style.animation = "jump 1s 3 ease-in-out"; // Winning jump
+            });
+            playerChoicesX.forEach(svg => {
+                svg.style.stroke = "gray"; // Losing gray out
+            });
+        } else {
+            playerChoicesX.forEach(svg => { 
+                svg.style.animation = "jump 1s 3 ease-in-out"; // Winning jump
+            });
+
+            playerChoicesO.forEach(svg => { 
+                svg.style.stroke = "gray"; // Losing gray out
+            });
+        }         
+    };
+
+    let tieAnimations = function() {
+        const svgs = document.querySelectorAll('svg');
+        svgs.forEach(svg => {
+            svg.style.animation = "gray-out 2s 2"
+        })
+    }
+
+    
+
+    let headerAnimations = function() {
+        const header = document.querySelector('.header');
+        const headerfirst = document.querySelector('.first');
+        const headersecond = document.querySelector('.second');
+        const headerthird = document.querySelector('.third');
+
+        // Disable existing animations
+        header.style.animation = "none";
+        headerfirst.style.animation = "none";
+        headersecond.style.animation = "none";
+        headerthird.style.animation = "none";
+
+        setTimeout(() => {
+            header.style.animation = "jump 1s 3"; // Apply jump animation to header
+            headerfirst.style.animation = "highlight 1s 1"; // Apply highlight animation to first header element
+        }, 10);
+        setTimeout(() => {
+            headersecond.style.animation = "highlight 1s 1"; // Apply highlight animation to second header element after a delay
+        }, 1010);
+        setTimeout(() => {
+            headerthird.style.animation = "highlight 1s 1"; // Apply highlight animation to third header element after a delay
+        }, 2010);
+    };
+
+    return {
+        endAnimations,
+        headerAnimations,
+        tieAnimations
+    };
+}();
 
 // GAME LOGIC HERE
 let analyze = function() {
@@ -24,13 +92,20 @@ let analyze = function() {
                 gameBoard[first][first1] === gameBoard[second][second1] &&
                 gameBoard[first][first1] === gameBoard[third][third1]
             ) {
-                let player;
-                gameBoard[first][first1] == playerX ? player = "X" : player = "O"
-                console.log(`Player ${player} wins!`)
+                if (gameBoard[first][first1] == playerX) {
+                    pageUpdate.playerWin(playerX);
+                    console.log(`Player X wins!`)
+
+                } else {
+                    pageUpdate.playerWin(playerO);
+                    console.log(`Player O wins!`)}
                 return true;
             } 
         } if(!gameBoard.flat().some(item => item === null)) {
-            console.log("It is a tie!")
+
+            setTimeout(() => {
+                animate.tieAnimations();
+            }, 1);
             return true;
         }
         return false;
@@ -40,12 +115,6 @@ let analyze = function() {
         checkStatus
     }
 }()
-
-
-/* SVG ICONS */
-let playerX = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="yellow" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-let playerO = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#FF6103" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
-/* -----------*/
 
 // MANIPULATE BOARD HERE
 let board = function() {
@@ -63,9 +132,7 @@ let board = function() {
             gameBoard[index][index2] = player;
             count++;
 
-            if(analyze.checkStatus(gameBoard) === true) {
-                pageUpdate.playerWin(player);
-            }
+            analyze.checkStatus(gameBoard)
             return player;
             
         } else {
@@ -81,6 +148,7 @@ let board = function() {
             [null, null, null],
             [null, null, null]
         ];
+        count = 1;
     }
 
     let getArrayCopy = function() {
@@ -96,16 +164,21 @@ let board = function() {
 
 // INTERACT WITH DOM HERE
 let pageUpdate = function(){
+
+    // INPUT MOVES
+    let count = 1;
     let handleClick = function(square) {
         const row = parseInt(square.dataset.row);
         const col = parseInt(square.dataset.col);
 
         let childSvg = document.createElement("svg");
+        count % 2 == 0 ? childSvg.classList.add('playerO') : childSvg.classList.add('playerX');
+
         let result = board.move(row, col);
-        
         if(result !== undefined) {
             childSvg.innerHTML = result;
             square.appendChild(childSvg);
+            count++ 
         }
     }
 
@@ -119,13 +192,38 @@ let pageUpdate = function(){
         });
     });
 
-    let playerWin = function() {
+    // RESET BOARD CALL
+    document.addEventListener('DOMContentLoaded', function() {
+        const square = document.querySelector('.reset-button');
+        square.addEventListener('click', function() {
+                resetBoard();
+            });
+    });
+
+    let resetBoard = function() {
         const squares = document.querySelectorAll('.square');
         squares.forEach(square => {
-            square.disabled = true;
+            while (square.firstChild){
+                square.removeChild(square.firstChild);     
+            }
+        square.disabled = false;   
+        })
+        count = 1;
+        board.resetBoard()
+    }
+
+    // DISABLE AND CALL ANIMATIONS MODULE WHEN WIN
+    let playerWin = function(player) {
+        const squares = document.querySelectorAll('.square');
+
+        squares.forEach(square => {
+            square.disabled = true;   
         });
+
+        // Delay because otherwise the last input does not get the animation idk why, the class is added before the function runs aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        setTimeout(() => {animate.endAnimations(player), 200, animate.headerAnimations()});
     };
-    
+
     return {
         playerWin
     }

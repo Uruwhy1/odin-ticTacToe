@@ -36,6 +36,47 @@
   }
 /* --------------------------------- */
 
+/* ANIMATIONS */
+
+@keyframes highlight {
+    0% {
+        color: #fff;
+    }
+    50% {
+        color: red;
+        font-size: 1.1em;
+    }
+    100% {
+        color: #fff;
+    }
+}
+
+@keyframes jump {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+        stroke: #fff;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes gray-out {
+    0% {
+        
+    }
+    50% {
+        stroke: #fff;
+        transform: scale(1.1);
+    }
+    100% {
+    }
+}
+/* --------------------------------------------- */
+
 body {
     background-color: #131313;
     font-family: Roboto, sans-serif;
@@ -43,7 +84,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 35px;
-    grid-template-areas: '. board-container .'
+    grid-template-areas: 'buttons board-container .'
                          'footer footer footer';
 }
 
@@ -55,8 +96,7 @@ body {
     height: fit-content;
 
     background-color: #C06C84;
-    border: 5px rgb(255, 255, 255) solid;
-    border-radius: 5px;
+    border: 2px rgb(255, 255, 255) solid;
 
     grid-area: board-container;
     align-self: center;
@@ -65,15 +105,21 @@ body {
     gap: 20px;
     grid-template-rows: 100px 500px;
     grid-template-areas: 'title' 'board';
-    
 }   
+
 
 .header {
     grid-area: title;
     place-self: start center;
 
     color: #fff;
+    padding: 10px;
     font-size: 2em;
+    background-color: #000;
+    border: 2px solid #fff;
+}
+.header span:nth-of-type(2) {
+    margin: 0 20px;
 }
 
 
@@ -97,9 +143,42 @@ body {
     place-items: center;
 }
 
-
-.square:disabled svg {
+.playerX {
+    stroke: yellow;
 }
+.playerO {
+    stroke: #FF6103;
+}
+
+/* -------------------------- */
+
+/* LEFT SIDE CSS */
+
+.buttons {
+    grid-area: buttons;
+    
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+.reset-button {
+    width: 150px;
+    height: 50px;
+    background-color: #C06C84;
+    border: 3px solid #fff;
+
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.2em;
+
+}
+.reset-button:hover {
+    box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.6);
+}
+.reset-button:active {
+    transform: scale(1.2);
+}
+
 /* -------------------------- */
 
 .footer {
@@ -107,10 +186,10 @@ body {
     display: grid;
     place-content: center;
 
-    background-color: #fff;
-    border-top: solid 4px rgb(255, 0, 0);
+    background-color: #000;
+    color: #fff;
 
-    font-weight: 700;
+    font-weight: 500    ;
 }
 .footer a {
     text-decoration: none;
